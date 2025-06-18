@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import * as schema from './db/schema';
+import { CacheModule } from './common/cache/cache.module';
 
 @Module({
   imports: [
@@ -30,6 +31,13 @@ import * as schema from './db/schema';
     }),
     AuthModule,
     ProfileModule,
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: () => ({
+        provider: 'memory',
+      }),
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

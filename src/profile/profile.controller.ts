@@ -10,12 +10,17 @@ import { JwtPayload } from 'src/auth/interface/jwt-payload.interface';
 export class ProfileController {
   constructor(private profileService: ProfileService) {}
 
+  @Post('verify/send')
+  async sendVerificationCode(@User() user: JwtPayload) {
+    return await this.profileService.sendVerificationCode(user.email);
+  }
+
   @Post()
   async createProfile(
     @User() user: JwtPayload,
     @Body() createProfileDto: CreateProfilePayload,
   ) {
-    return await this.profileService.createProfile(createProfileDto);
+    return await this.profileService.createProfile(user, createProfileDto);
   }
 
   @Get()

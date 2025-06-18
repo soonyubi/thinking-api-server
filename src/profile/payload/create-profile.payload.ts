@@ -2,9 +2,6 @@ import { IsNotEmpty, IsString, IsEnum, IsDate } from 'class-validator';
 import { Role } from 'src/common/enums/role.enum';
 
 export class CreateProfilePayload {
-  @IsNotEmpty()
-  userId: number;
-
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -14,4 +11,8 @@ export class CreateProfilePayload {
 
   @IsDate()
   birthDate: Date;
+
+  @IsString()
+  @IsNotEmpty()
+  verificationCode: string;
 }
