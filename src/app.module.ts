@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { DrizzleMySqlModule } from '@knaadh/nestjs-drizzle-mysql2';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { ProfileModule } from './profile/profile.module';
 import * as schema from './db/schema';
 
 @Module({
@@ -28,6 +29,7 @@ import * as schema from './db/schema';
       }),
     }),
     AuthModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
