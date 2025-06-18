@@ -15,9 +15,7 @@ export class ProfileController {
     @User() user: JwtPayload,
     @Body() createProfileDto: CreateProfilePayload,
   ) {
-    console.log(user);
-    console.log(createProfileDto);
-    // return await this.profileService.createProfile(createProfileDto);
+    return await this.profileService.createProfile(createProfileDto);
   }
 
   @Get()
