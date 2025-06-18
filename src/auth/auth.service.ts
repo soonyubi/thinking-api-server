@@ -1,4 +1,3 @@
-// src/modules/auth/auth.service.ts
 import {
   Injectable,
   UnauthorizedException,
@@ -9,6 +8,8 @@ import { AuthRepository } from './auth.repository';
 import { SignupPayload } from './payload/signup.payload';
 import { LoginPayload } from './payload/login.payload';
 import * as bcrypt from 'bcrypt';
+import { AccountToken } from './interface/account-token.interface';
+import { Role } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class AuthService {
@@ -76,5 +77,25 @@ export class AuthService {
         email: user.email,
       },
     };
+  }
+
+  async validateToken(token: string): Promise<AccountToken> {
+    try {
+      const decoded = this.jwtService.verify(token);
+      const user = await this.authRepository.findById(decoded.userId);
+      if (!user) {
+        throw new UnauthorizedException('Invalid token');
+      }
+      return {
+        id: user.id,
+        email: user.email,
+        role: Role.STUDENT, // TODO: PROFILE 기능 추가 후 수정
+      };
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new UnauthorizedException('Token expired');
+      }
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 }

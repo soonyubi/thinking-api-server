@@ -23,4 +23,10 @@ export class AuthRepository {
     });
     return insertedUser;
   }
+
+  async findById(id: number) {
+    return await this.db.query.users.findFirst({
+      where: (users) => eq(users.id, id),
+    });
+  }
 }
