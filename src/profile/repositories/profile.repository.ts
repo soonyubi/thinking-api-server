@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { MySql2Database } from 'drizzle-orm/mysql2';
-import { profiles } from '../db/schema';
+import { profiles, users } from '../../db/schema';
 import { eq } from 'drizzle-orm';
-import * as schema from '../db/schema';
+import * as schema from '../../db/schema';
 
 @Injectable()
 export class ProfileRepository {
@@ -15,7 +15,7 @@ export class ProfileRepository {
   }
 
   async findByUserId(userId: number) {
-    return await this.db.query.profiles.findMany({
+    return await this.db.query.profiles.findFirst({
       where: (profiles) => eq(profiles.userId, userId),
     });
   }
@@ -33,5 +33,16 @@ export class ProfileRepository {
       limit: 1,
     });
     return insertedProfile;
+  }
+
+  async findUserWithProfileByUserEmail(email: string) {
+    const result = await this.db.query.users.findFirst({
+      where: eq(users.email, email),
+      with: {
+        profiles: true,
+      },
+    });
+
+    return result;
   }
 }

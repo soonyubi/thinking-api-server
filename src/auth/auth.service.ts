@@ -10,12 +10,15 @@ import { LoginPayload } from './payload/login.payload';
 import * as bcrypt from 'bcrypt';
 import { AccountToken } from './interface/account-token.interface';
 import { Role } from 'src/common/enums/role.enum';
+import { ProfileRepository } from 'src/profile/repositories/profile.repository';
+import { JwtPayload } from './interface/jwt-payload.interface';
 
 @Injectable()
 export class AuthService {
   constructor(
     private authRepository: AuthRepository,
     private jwtService: JwtService,
+    private profileRepository: ProfileRepository,
   ) {}
 
   async signup(signupDto: SignupPayload) {
@@ -65,16 +68,29 @@ export class AuthService {
       );
     }
 
-    const token = this.jwtService.sign({
+    const profile = await this.profileRepository.findByUserId(user.id);
+
+    const payload: JwtPayload = {
       userId: user.id,
       email: user.email,
-    });
+      profileId: profile?.id,
+      role: profile?.role as Role,
+    };
+
+    const token = this.jwtService.sign(payload);
 
     return {
       token,
       user: {
         id: user.id,
         email: user.email,
+        profile: profile
+          ? {
+              id: profile.id,
+              role: profile.role,
+              name: profile.name,
+            }
+          : null,
       },
     };
   }

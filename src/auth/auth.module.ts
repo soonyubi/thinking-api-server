@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller';
 import { AuthRepository } from './auth.repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ProfileModule } from 'src/profile/profile.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    ProfileModule,
   ],
   providers: [AuthService, AuthRepository, JwtStrategy],
   controllers: [AuthController],

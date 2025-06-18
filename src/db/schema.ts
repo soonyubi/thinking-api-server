@@ -5,6 +5,7 @@ import {
   date,
   int,
 } from 'drizzle-orm/mysql-core';
+import { relations } from 'drizzle-orm';
 
 export const users = mysqlTable('users', {
   id: int('id').primaryKey().autoincrement(),
@@ -57,3 +58,14 @@ export const profileRelationships = mysqlTable('profile_relationships', {
   relationType: varchar('relation_type', { length: 50 }).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  profiles: many(profiles),
+}));
+
+export const profilesRelations = relations(profiles, ({ one }) => ({
+  user: one(users, {
+    fields: [profiles.userId],
+    references: [users.id],
+  }),
+}));
