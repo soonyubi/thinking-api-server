@@ -7,7 +7,9 @@ import * as schema from './db/schema';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     DrizzleMySqlModule.registerAsync({
       tag: 'DB_PROD',
       inject: [ConfigService],
