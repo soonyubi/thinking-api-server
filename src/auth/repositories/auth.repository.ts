@@ -1,8 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { MySql2Database } from 'drizzle-orm/mysql2';
-import { users } from '../db/schema';
+import { users } from '../../db/schema';
 import { eq } from 'drizzle-orm';
-import * as schema from '../db/schema';
+import * as schema from '../../db/schema';
 
 @Injectable()
 export class AuthRepository {

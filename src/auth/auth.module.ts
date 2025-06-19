@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { AuthRepository } from './auth.repository';
+import { AuthRepository } from './repositories/auth.repository';
 import { ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { ProfileModule } from 'src/profile/profile.module';
+import { UserSessionRepository } from './repositories/user-session.repository';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { ProfileModule } from 'src/profile/profile.module';
     }),
     ProfileModule,
   ],
-  providers: [AuthService, AuthRepository, JwtStrategy],
+  providers: [AuthService, AuthRepository, JwtStrategy, UserSessionRepository],
   controllers: [AuthController],
   exports: [AuthService],
 })

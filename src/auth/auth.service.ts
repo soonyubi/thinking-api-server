@@ -2,9 +2,10 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AuthRepository } from './auth.repository';
+import { AuthRepository } from './repositories/auth.repository';
 import { SignupPayload } from './payload/signup.payload';
 import { LoginPayload } from './payload/login.payload';
 import * as bcrypt from 'bcrypt';
@@ -12,6 +13,7 @@ import { AccountToken } from './interface/account-token.interface';
 import { Role } from 'src/common/enums/role.enum';
 import { ProfileRepository } from 'src/profile/repositories/profile.repository';
 import { JwtPayload } from './interface/jwt-payload.interface';
+import { UserSessionRepository } from './repositories/user-session.repository';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +21,7 @@ export class AuthService {
     private authRepository: AuthRepository,
     private jwtService: JwtService,
     private profileRepository: ProfileRepository,
+    private userSessionRepository: UserSessionRepository,
   ) {}
 
   async signup(signupDto: SignupPayload) {
@@ -102,10 +105,22 @@ export class AuthService {
       if (!user) {
         throw new UnauthorizedException('Invalid token');
       }
+
+      const userSession = await this.userSessionRepository.findByUserId(
+        user.id,
+      );
+      let activeProfile = null;
+
+      if (userSession?.lastProfileId) {
+        activeProfile = await this.profileRepository.findById(
+          userSession.lastProfileId,
+        );
+      }
+
       return {
         id: user.id,
         email: user.email,
-        role: Role.STUDENT, // TODO: PROFILE 기능 추가 후 수정
+        role: activeProfile?.role as Role,
       };
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
@@ -113,5 +128,31 @@ export class AuthService {
       }
       throw new UnauthorizedException('Invalid token');
     }
+  }
+
+  async selectProfile(userId: number, profileId: number) {
+    const profile = await this.profileRepository.findById(profileId);
+    if (!profile || profile.id !== profileId) {
+      throw new NotFoundException('Profile not found');
+    }
+
+    await this.userSessionRepository.upsert(userId, profileId);
+
+    const user = await this.authRepository.findById(userId);
+    const newToken = this.jwtService.sign({
+      userId: user.id,
+      email: user.email,
+      profileId: profile.id,
+      role: profile.role as Role,
+    });
+
+    return {
+      token: newToken,
+      profile: {
+        id: profile.id,
+        role: profile.role,
+        name: profile.name,
+      },
+    };
   }
 }
