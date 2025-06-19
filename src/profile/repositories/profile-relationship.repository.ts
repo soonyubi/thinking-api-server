@@ -3,6 +3,7 @@ import { MySql2Database } from 'drizzle-orm/mysql2';
 import { profileRelationships } from '../../db/schema';
 import { eq, and } from 'drizzle-orm';
 import * as schema from '../../db/schema';
+import { RelationType } from 'src/common/enums/relation-type.enum';
 
 @Injectable()
 export class ProfileRelationshipRepository {
@@ -11,7 +12,7 @@ export class ProfileRelationshipRepository {
   async create(data: {
     parentProfileId: number;
     childProfileId: number;
-    relationType: string;
+    relationType: RelationType;
   }) {
     const result = await this.db.insert(profileRelationships).values(data);
     return result;

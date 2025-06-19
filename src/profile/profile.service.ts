@@ -76,67 +76,112 @@ export class ProfileService {
 
   async registerRelationship(
     requestingProfileId: number,
+    requestingRole: Role,
     targetUserEmail: string,
-    relationType: RelationType,
   ) {
-    const targetUser =
+    if (requestingRole === Role.STUDENT) {
+      return await this.registerChildParentRelationship(
+        requestingProfileId,
+        targetUserEmail,
+      );
+    } else if (requestingRole === Role.PARENT) {
+      return await this.registerParentChildRelationship(
+        requestingProfileId,
+        targetUserEmail,
+      );
+    } else {
+      throw new BadRequestException('Invalid role');
+    }
+  }
+
+  async registerParentChildRelationship(
+    requestingProfileId: number,
+    targetUserEmail: string,
+  ) {
+    const studentUser =
       await this.profileRepository.findUserWithProfileByUserEmail(
         targetUserEmail,
       );
-    if (!targetUser) {
-      throw new BadRequestException('Target profile not found');
+
+    if (!studentUser) {
+      throw new NotFoundException('Target user not found');
+    }
+
+    const targetProfile = studentUser.profiles.find(
+      (profile) => profile.role === Role.STUDENT,
+    );
+
+    if (!targetProfile) {
+      throw new NotFoundException('Target profile not found');
     }
 
     const requestingProfile =
       await this.profileRepository.findById(requestingProfileId);
 
-    if (relationType === RelationType.PARENT) {
-      if (
-        requestingProfile.role !== Role.PARENT ||
-        targetProfile.role !== Role.STUDENT
-      ) {
-        throw new BadRequestException(
-          'Invalid role combination for parent-child relationship',
-        );
-      }
-    } else {
-      if (
-        requestingProfile.role !== Role.STUDENT ||
-        targetProfile.role !== Role.PARENT
-      ) {
-        throw new BadRequestException(
-          'Invalid role combination for child-parent relationship',
-        );
-      }
+    if (!requestingProfile) {
+      throw new NotFoundException('Requesting profile not found');
     }
 
     const existingRelation =
       await this.relationshipRepository.findExistingRelation(
-        relationType === RelationType.PARENT
-          ? requestingProfileId
-          : targetProfile.id,
-        relationType === RelationType.PARENT
-          ? targetProfile.id
-          : requestingProfileId,
+        requestingProfileId,
+        targetProfile.id,
       );
 
     if (existingRelation) {
-      throw new ConflictException('Relationship already exists');
+      throw new ConflictException('Relation already exists');
     }
 
     await this.relationshipRepository.create({
-      parentProfileId:
-        relationType === RelationType.PARENT
-          ? requestingProfileId
-          : targetProfile.id,
-      childProfileId:
-        relationType === RelationType.PARENT
-          ? targetProfile.id
-          : requestingProfileId,
-      relationType: relationType,
+      parentProfileId: requestingProfileId,
+      childProfileId: targetProfile.id,
+      relationType: RelationType.PARENT,
     });
+  }
 
-    return { message: 'Relationship registered successfully' };
+  async registerChildParentRelationship(
+    childProfileId: number,
+    parentUserEmail: string,
+  ) {
+    const parentUser =
+      await this.profileRepository.findUserWithProfileByUserEmail(
+        parentUserEmail,
+      );
+
+    if (!parentUser) {
+      throw new NotFoundException('Target user not found');
+    }
+
+    const targetProfile = parentUser.profiles.find(
+      (profile) => profile.role === Role.PARENT,
+    );
+
+    if (!targetProfile) {
+      throw new NotFoundException('Target profile not found');
+    }
+
+    const requestingProfile =
+      await this.profileRepository.findById(childProfileId);
+
+    if (!requestingProfile) {
+      throw new NotFoundException('Requesting profile not found');
+    }
+
+    const existingRelation =
+      await this.relationshipRepository.findExistingRelation(
+        targetProfile.id,
+        childProfileId,
+      );
+
+    if (existingRelation) {
+      throw new ConflictException('Relation already exists');
+    }
+
+    await this.relationshipRepository.create({
+      parentProfileId: targetProfile.id,
+      childProfileId: childProfileId,
+      relationType: RelationType.CHILD,
+    });
   }
 
   async getRelatedProfiles(profileId: number, role: Role) {

@@ -57,8 +57,8 @@ export class ProfileController {
 
     return await this.profileService.registerRelationship(
       user.profileId,
+      user.role,
       payload.targetUserEmail,
-      payload.relationType,
     );
   }
 
