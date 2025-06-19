@@ -4,6 +4,7 @@ import {
   timestamp,
   date,
   int,
+  uniqueIndex,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
@@ -69,3 +70,19 @@ export const profilesRelations = relations(profiles, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const userSessions = mysqlTable(
+  'user_sessions',
+  {
+    id: int('id').primaryKey().autoincrement(),
+    userId: int('user_id')
+      .references(() => users.id)
+      .notNull(),
+    lastProfileId: int('last_profile_id').references(() => profiles.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdUnique: uniqueIndex('user_sessions_user_id_unique').on(table.userId),
+  }),
+);
