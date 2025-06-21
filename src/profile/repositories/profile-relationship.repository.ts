@@ -7,7 +7,10 @@ import { RelationType } from 'src/common/enums/relation-type.enum';
 
 @Injectable()
 export class ProfileRelationshipRepository {
-  constructor(@Inject('DB_PROD') private db: MySql2Database<typeof schema>) {}
+  constructor(
+    @Inject(process.env.NODE_ENV === 'test' ? 'DB_TEST' : 'DB_PROD')
+    private db: MySql2Database<typeof schema>,
+  ) {}
 
   async create(data: {
     parentProfileId: number;

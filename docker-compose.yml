@@ -18,8 +18,26 @@ services:
     networks:
       - thinking-network
 
+  test-mysql:
+    image: mysql:8.0
+    container_name: thinking-test-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: test_root_password
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: test_user
+      MYSQL_PASSWORD: test_password
+    ports:
+      - '3307:3306'
+    volumes:
+      - test_mysql_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - thinking-network
+
 volumes:
   mysql_data:
+  test_mysql_data:
 
 networks:
   thinking-network:

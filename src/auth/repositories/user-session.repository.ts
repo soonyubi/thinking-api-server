@@ -6,7 +6,10 @@ import * as schema from '../../db/schema';
 
 @Injectable()
 export class UserSessionRepository {
-  constructor(@Inject('DB_PROD') private db: MySql2Database<typeof schema>) {}
+  constructor(
+    @Inject(process.env.NODE_ENV === 'test' ? 'DB_TEST' : 'DB_PROD')
+    private db: MySql2Database<typeof schema>,
+  ) {}
 
   async findByUserId(userId: number) {
     return await this.db.query.userSessions.findFirst({
