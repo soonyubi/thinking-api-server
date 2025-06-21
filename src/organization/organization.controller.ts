@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   UseGuards,
+  UseInterceptors,
   ParseIntPipe,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -20,9 +21,12 @@ import { RolesGuard } from 'src/auth/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'src/common/enums/role.enum';
 import { OrganizationRole } from 'src/common/enums/organization-role.enum';
+import { OrganizationPermissionInterceptor } from './interceptors/organization-permission.interceptor';
+import { OrganizationPermission } from './decorators/organization-permission.decorator';
 
 @Controller('organizations')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@UseInterceptors(OrganizationPermissionInterceptor)
 export class OrganizationController {
   constructor(private organizationService: OrganizationService) {}
 
@@ -43,78 +47,38 @@ export class OrganizationController {
   }
 
   @Get(':id')
-  async getOrganization(
-    @Param('id', ParseIntPipe) organizationId: number,
-    @User() user: JwtPayload,
-  ) {
-    if (!user.profileId) {
-      throw new UnauthorizedException('Profile required for this operation');
-    }
-
-    const hasPermission = await this.organizationService.checkMemberPermission(
-      organizationId,
-      user.profileId,
-      [
-        OrganizationRole.MAIN_ADMIN,
-        OrganizationRole.SUB_ADMIN,
-        OrganizationRole.STUDENT,
-        OrganizationRole.PARENT,
-      ],
-    );
-
-    if (!hasPermission) {
-      throw new UnauthorizedException(
-        'You are not a member of this organization',
-      );
-    }
-
+  @OrganizationPermission([
+    OrganizationRole.MAIN_ADMIN,
+    OrganizationRole.SUB_ADMIN,
+    OrganizationRole.STUDENT,
+    OrganizationRole.PARENT,
+  ])
+  async getOrganization(@Param('id', ParseIntPipe) organizationId: number) {
     return await this.organizationService.getOrganizationById(organizationId);
   }
 
   @Get(':id/members')
+  @OrganizationPermission([
+    OrganizationRole.MAIN_ADMIN,
+    OrganizationRole.SUB_ADMIN,
+  ])
   async getOrganizationMembers(
     @Param('id', ParseIntPipe) organizationId: number,
-    @User() user: JwtPayload,
   ) {
-    if (!user.profileId) {
-      throw new UnauthorizedException('Profile required for this operation');
-    }
-
-    const hasPermission = await this.organizationService.checkMemberPermission(
-      organizationId,
-      user.profileId,
-      [OrganizationRole.MAIN_ADMIN, OrganizationRole.SUB_ADMIN],
-    );
-
-    if (!hasPermission) {
-      throw new UnauthorizedException('Only admins can view member list');
-    }
-
     return await this.organizationService.getOrganizationMembers(
       organizationId,
     );
   }
 
   @Get(':id/members/:role')
+  @OrganizationPermission([
+    OrganizationRole.MAIN_ADMIN,
+    OrganizationRole.SUB_ADMIN,
+  ])
   async getOrganizationMembersByRole(
     @Param('id', ParseIntPipe) organizationId: number,
     @Param('role') role: OrganizationRole,
-    @User() user: JwtPayload,
   ) {
-    if (!user.profileId) {
-      throw new UnauthorizedException('Profile required for this operation');
-    }
-
-    const hasPermission = await this.organizationService.checkMemberPermission(
-      organizationId,
-      user.profileId,
-      [OrganizationRole.MAIN_ADMIN, OrganizationRole.SUB_ADMIN],
-    );
-
-    if (!hasPermission) {
-      throw new UnauthorizedException('Only admins can view member list');
-    }
-
     return await this.organizationService.getOrganizationMembersByRole(
       organizationId,
       role,
@@ -122,6 +86,10 @@ export class OrganizationController {
   }
 
   @Post(':id/members')
+  @OrganizationPermission([
+    OrganizationRole.MAIN_ADMIN,
+    OrganizationRole.SUB_ADMIN,
+  ])
   async addMember(
     @Param('id', ParseIntPipe) organizationId: number,
     @Body() addMemberDto: AddMemberPayload,
@@ -139,6 +107,7 @@ export class OrganizationController {
   }
 
   @Put(':id/members/:profileId/role')
+  @OrganizationPermission([OrganizationRole.MAIN_ADMIN])
   async updateMemberRole(
     @Param('id', ParseIntPipe) organizationId: number,
     @Param('profileId', ParseIntPipe) profileId: number,
@@ -158,6 +127,7 @@ export class OrganizationController {
   }
 
   @Delete(':id/members/:profileId')
+  @OrganizationPermission([OrganizationRole.MAIN_ADMIN])
   async removeMember(
     @Param('id', ParseIntPipe) organizationId: number,
     @Param('profileId', ParseIntPipe) profileId: number,
