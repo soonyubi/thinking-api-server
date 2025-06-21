@@ -3,7 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DrizzleMySqlModule } from '@knaadh/nestjs-drizzle-mysql2';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { ProfileModule } from './profile/profile.module';
 import * as schema from './db/schema';
+import { CacheModule } from './common/cache/cache.module';
 
 @Module({
   imports: [
@@ -24,6 +27,15 @@ import * as schema from './db/schema';
           },
         },
         config: { schema: { ...schema }, mode: 'default' },
+      }),
+    }),
+    AuthModule,
+    ProfileModule,
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: () => ({
+        provider: 'memory',
       }),
     }),
   ],

@@ -4,7 +4,9 @@ import {
   timestamp,
   date,
   int,
+  uniqueIndex,
 } from 'drizzle-orm/mysql-core';
+import { relations } from 'drizzle-orm';
 
 export const users = mysqlTable('users', {
   id: int('id').primaryKey().autoincrement(),
@@ -57,3 +59,52 @@ export const profileRelationships = mysqlTable('profile_relationships', {
   relationType: varchar('relation_type', { length: 50 }).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  profiles: many(profiles),
+}));
+
+export const profilesRelations = relations(profiles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [profiles.userId],
+    references: [users.id],
+  }),
+  parentRelationships: many(profileRelationships, {
+    relationName: 'parentProfile',
+  }),
+  childRelationships: many(profileRelationships, {
+    relationName: 'childProfile',
+  }),
+}));
+
+export const profileRelationshipsRelations = relations(
+  profileRelationships,
+  ({ one }) => ({
+    parentProfile: one(profiles, {
+      fields: [profileRelationships.parentProfileId],
+      references: [profiles.id],
+      relationName: 'parentProfile',
+    }),
+    childProfile: one(profiles, {
+      fields: [profileRelationships.childProfileId],
+      references: [profiles.id],
+      relationName: 'childProfile',
+    }),
+  }),
+);
+
+export const userSessions = mysqlTable(
+  'user_sessions',
+  {
+    id: int('id').primaryKey().autoincrement(),
+    userId: int('user_id')
+      .references(() => users.id)
+      .notNull(),
+    lastProfileId: int('last_profile_id').references(() => profiles.id),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdUnique: uniqueIndex('user_sessions_user_id_unique').on(table.userId),
+  }),
+);
