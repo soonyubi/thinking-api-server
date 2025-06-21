@@ -5,6 +5,7 @@ import {
   date,
   int,
   uniqueIndex,
+  index,
 } from 'drizzle-orm/mysql-core';
 import { relations } from 'drizzle-orm';
 
@@ -32,21 +33,34 @@ export const organizations = mysqlTable('organizations', {
   id: int('id').primaryKey().autoincrement(),
   name: varchar('name', { length: 100 }).notNull(),
   type: varchar('type', { length: 50 }).notNull(),
+  mainAdminProfileId: int('main_admin_profile_id')
+    .references(() => profiles.id)
+    .notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
-export const profileOrganization = mysqlTable('profile_organization', {
-  id: int('id').primaryKey().autoincrement(),
-  profileId: int('profile_id')
-    .references(() => profiles.id)
-    .notNull(),
-  organizationId: int('organization_id')
-    .references(() => organizations.id)
-    .notNull(),
-  roleInOrg: varchar('role_in_org', { length: 50 }).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+export const profileOrganization = mysqlTable(
+  'profile_organization',
+  {
+    id: int('id').primaryKey().autoincrement(),
+    profileId: int('profile_id')
+      .references(() => profiles.id)
+      .notNull(),
+    organizationId: int('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
+    roleInOrg: varchar('role_in_org', { length: 50 }).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    profileOrgUnique: uniqueIndex('profile_org_unique').on(
+      table.profileId,
+      table.organizationId,
+    ),
+    roleInOrgIdx: index('role_in_org_idx').on(table.roleInOrg),
+  }),
+);
 
 export const profileRelationships = mysqlTable('profile_relationships', {
   id: int('id').primaryKey().autoincrement(),
@@ -75,7 +89,37 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   childRelationships: many(profileRelationships, {
     relationName: 'childProfile',
   }),
+  organizationMemberships: many(profileOrganization),
+  mainAdminOrganizations: many(organizations, {
+    relationName: 'mainAdmin',
+  }),
 }));
+
+export const organizationsRelations = relations(
+  organizations,
+  ({ one, many }) => ({
+    mainAdminProfile: one(profiles, {
+      fields: [organizations.mainAdminProfileId],
+      references: [profiles.id],
+      relationName: 'mainAdmin',
+    }),
+    members: many(profileOrganization),
+  }),
+);
+
+export const profileOrganizationRelations = relations(
+  profileOrganization,
+  ({ one }) => ({
+    profile: one(profiles, {
+      fields: [profileOrganization.profileId],
+      references: [profiles.id],
+    }),
+    organization: one(organizations, {
+      fields: [profileOrganization.organizationId],
+      references: [organizations.id],
+    }),
+  }),
+);
 
 export const profileRelationshipsRelations = relations(
   profileRelationships,
