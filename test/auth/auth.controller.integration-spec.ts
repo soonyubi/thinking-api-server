@@ -11,14 +11,15 @@ import { CacheModule } from '../../src/common/cache/cache.module';
 import { TestDbModule } from '../test-db.module';
 import { MySql2Database } from 'drizzle-orm/mysql2';
 import * as schema from '../../src/db/schema';
-import { eq } from 'drizzle-orm';
 import { JwtService } from '@nestjs/jwt';
+import { TestCleanupHelper } from '../helpers/test-cleanup.helper';
 
 describe('AuthController (Integration)', () => {
   let app: INestApplication;
   let authService: AuthService;
   let db: MySql2Database<typeof schema>;
   let jwtService: JwtService;
+  let cleanupHelper: TestCleanupHelper;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -53,6 +54,7 @@ describe('AuthController (Integration)', () => {
     authService = moduleFixture.get<AuthService>(AuthService);
     db = moduleFixture.get<MySql2Database<typeof schema>>('DB_TEST');
     jwtService = moduleFixture.get<JwtService>(JwtService);
+    cleanupHelper = new TestCleanupHelper(db);
   });
 
   afterAll(async () => {
@@ -76,9 +78,7 @@ describe('AuthController (Integration)', () => {
       expect(result.user).toHaveProperty('email');
       expect(result.user.email).toBe(signupData.email);
 
-      await db
-        .delete(schema.users)
-        .where(eq(schema.users.email, signupData.email));
+      await cleanupHelper.cleanupUser(signupData.email);
     });
 
     it('should return 409 for existing email', async () => {
@@ -93,9 +93,7 @@ describe('AuthController (Integration)', () => {
         '이미 존재하는 이메일입니다.',
       );
 
-      await db
-        .delete(schema.users)
-        .where(eq(schema.users.email, signupData.email));
+      await cleanupHelper.cleanupUser(signupData.email);
     });
   });
 
@@ -116,9 +114,7 @@ describe('AuthController (Integration)', () => {
       expect(result.user).toHaveProperty('email');
       expect(result.user.email).toBe(loginData.email);
 
-      await db
-        .delete(schema.users)
-        .where(eq(schema.users.email, loginData.email));
+      await cleanupHelper.cleanupUser(loginData.email);
     });
 
     it('should return 401 for invalid email', async () => {
