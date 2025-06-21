@@ -64,12 +64,34 @@ export const usersRelations = relations(users, ({ many }) => ({
   profiles: many(profiles),
 }));
 
-export const profilesRelations = relations(profiles, ({ one }) => ({
+export const profilesRelations = relations(profiles, ({ one, many }) => ({
   user: one(users, {
     fields: [profiles.userId],
     references: [users.id],
   }),
+  parentRelationships: many(profileRelationships, {
+    relationName: 'parentProfile',
+  }),
+  childRelationships: many(profileRelationships, {
+    relationName: 'childProfile',
+  }),
 }));
+
+export const profileRelationshipsRelations = relations(
+  profileRelationships,
+  ({ one }) => ({
+    parentProfile: one(profiles, {
+      fields: [profileRelationships.parentProfileId],
+      references: [profiles.id],
+      relationName: 'parentProfile',
+    }),
+    childProfile: one(profiles, {
+      fields: [profileRelationships.childProfileId],
+      references: [profiles.id],
+      relationName: 'childProfile',
+    }),
+  }),
+);
 
 export const userSessions = mysqlTable(
   'user_sessions',
