@@ -3,7 +3,7 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  UnauthorizedException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Observable, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -21,18 +21,30 @@ export class OrganizationPermissionInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
+    const response = context.switchToHttp().getResponse();
     const user = request.user;
     const metadata = Reflect.getMetadata(
       'organizationPermission',
       context.getHandler(),
     ) as OrganizationPermissionMetadata;
 
-    if (!metadata) {
+    if (
+      !metadata ||
+      !metadata.requiredRoles ||
+      metadata.requiredRoles.length === 0
+    ) {
       return next.handle();
     }
 
-    if (!user?.profileId) {
-      throw new UnauthorizedException('Profile required for this operation');
+    if (!user?.profileId || user.profileId === 0) {
+      response.status(HttpStatus.UNAUTHORIZED);
+      return from(
+        Promise.resolve({
+          statusCode: HttpStatus.UNAUTHORIZED,
+          message: 'Profile required for this operation',
+          error: 'Unauthorized',
+        }),
+      );
     }
 
     const organizationId = this.extractOrganizationId(
@@ -41,7 +53,14 @@ export class OrganizationPermissionInterceptor implements NestInterceptor {
     );
 
     if (!organizationId) {
-      throw new UnauthorizedException('Organization ID is required');
+      response.status(HttpStatus.BAD_REQUEST);
+      return from(
+        Promise.resolve({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: 'Organization ID is required',
+          error: 'Bad Request',
+        }),
+      );
     }
 
     return from(
@@ -53,8 +72,13 @@ export class OrganizationPermissionInterceptor implements NestInterceptor {
     ).pipe(
       switchMap((hasPermission) => {
         if (!hasPermission) {
-          throw new UnauthorizedException(
-            'Insufficient permissions for this organization',
+          response.status(HttpStatus.FORBIDDEN);
+          return from(
+            Promise.resolve({
+              statusCode: HttpStatus.FORBIDDEN,
+              message: 'Insufficient permissions for this organization',
+              error: 'Forbidden',
+            }),
           );
         }
         return next.handle();
@@ -65,9 +89,14 @@ export class OrganizationPermissionInterceptor implements NestInterceptor {
   private extractOrganizationId(
     request: any,
     paramName: string = 'id',
-  ): number {
+  ): number | null {
     const organizationId = request.params[paramName];
-    return organizationId ? parseInt(organizationId, 10) : null;
+    if (!organizationId) {
+      return null;
+    }
+
+    const parsedId = parseInt(organizationId, 10);
+    return isNaN(parsedId) ? null : parsedId;
   }
 
   private async checkPermission(
