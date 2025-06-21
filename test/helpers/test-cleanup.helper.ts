@@ -1,6 +1,6 @@
 import { MySql2Database } from 'drizzle-orm/mysql2';
 import * as schema from '../../src/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 
 export class TestCleanupHelper {
   constructor(private db: MySql2Database<typeof schema>) {}
@@ -25,11 +25,13 @@ export class TestCleanupHelper {
    * 모든 테스트 데이터 정리
    */
   async cleanupAllTestData(): Promise<void> {
+    await this.db.execute(sql`SET FOREIGN_KEY_CHECKS = 0`);
     await this.db.delete(schema.profileRelationships);
     await this.db.delete(schema.userSessions);
     await this.db.delete(schema.profiles);
     await this.db.delete(schema.organizations);
     await this.db.delete(schema.users);
+    await this.db.execute(sql`SET FOREIGN_KEY_CHECKS = 1`);
   }
 
   /**
