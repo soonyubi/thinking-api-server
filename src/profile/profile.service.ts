@@ -28,8 +28,10 @@ export class ProfileService {
   ) {
     const cachedCode = await this.cacheStore.get(`verification:${user.email}`);
 
-    if (cachedCode) {
-      throw new BadRequestException('Verification code has already been sent');
+    if (!cachedCode) {
+      throw new BadRequestException(
+        'Verification code not found. Please request a new code.',
+      );
     }
 
     if (cachedCode !== createProfilePayload.verificationCode) {
