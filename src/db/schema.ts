@@ -64,6 +64,33 @@ export const profileOrganization = mysqlTable(
   }),
 );
 
+export const organizationPermissions = mysqlTable(
+  'organization_permissions',
+  {
+    id: int('id').primaryKey().autoincrement(),
+    organizationId: int('organization_id')
+      .references(() => organizations.id)
+      .notNull(),
+    profileId: int('profile_id')
+      .references(() => profiles.id)
+      .notNull(),
+    permission: varchar('permission', { length: 100 }).notNull(),
+    grantedByProfileId: int('granted_by_profile_id')
+      .references(() => profiles.id)
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    expiresAt: timestamp('expires_at'),
+  },
+  (table) => ({
+    orgProfilePermissionUnique: uniqueIndex('org_profile_permission_unique').on(
+      table.organizationId,
+      table.profileId,
+      table.permission,
+    ),
+    permissionIdx: index('permission_idx').on(table.permission),
+  }),
+);
+
 export const profileRelationships = mysqlTable('profile_relationships', {
   id: int('id').primaryKey().autoincrement(),
   parentProfileId: int('parent_profile_id')
@@ -98,6 +125,12 @@ export const profilesRelations = relations(profiles, ({ one, many }) => ({
   courseEnrollments: many(courseEnrollments),
   classAttendances: many(classAttendances),
   instructedClasses: many(courseClasses),
+  grantedPermissions: many(organizationPermissions, {
+    relationName: 'grantedBy',
+  }),
+  receivedPermissions: many(organizationPermissions, {
+    relationName: 'receivedBy',
+  }),
 }));
 
 export const organizationsRelations = relations(
@@ -110,6 +143,7 @@ export const organizationsRelations = relations(
     }),
     members: many(profileOrganization),
     courses: many(courses),
+    permissions: many(organizationPermissions),
   }),
 );
 
@@ -123,6 +157,26 @@ export const profileOrganizationRelations = relations(
     organization: one(organizations, {
       fields: [profileOrganization.organizationId],
       references: [organizations.id],
+    }),
+  }),
+);
+
+export const organizationPermissionsRelations = relations(
+  organizationPermissions,
+  ({ one }) => ({
+    organization: one(organizations, {
+      fields: [organizationPermissions.organizationId],
+      references: [organizations.id],
+    }),
+    profile: one(profiles, {
+      fields: [organizationPermissions.profileId],
+      references: [profiles.id],
+      relationName: 'receivedBy',
+    }),
+    grantedBy: one(profiles, {
+      fields: [organizationPermissions.grantedByProfileId],
+      references: [profiles.id],
+      relationName: 'grantedBy',
     }),
   }),
 );

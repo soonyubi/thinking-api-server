@@ -29,6 +29,20 @@
       "when": 1750511178342,
       "tag": "0003_fresh_kat_farrell",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1750640345489,
+      "tag": "0004_married_mathemanic",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1750640357429,
+      "tag": "0005_perpetual_ghost_rider",
+      "breakpoints": true
     }
   ]
 }
