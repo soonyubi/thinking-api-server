@@ -13,6 +13,10 @@ import { CourseService } from './course.service';
 import {
   CreateCoursePayload,
   UpdateCoursePayload,
+  CreateCourseSessionPayload,
+  UpdateCourseSessionPayload,
+  CreateCourseClassPayload,
+  UpdateCourseClassPayload,
 } from './payload/course.payload';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RequirePermission } from '../permission/decorators/permission.decorator';
@@ -91,5 +95,118 @@ export class CourseController {
       organizationId,
       user.profileId,
     );
+  }
+
+  @Post(':courseId/sessions')
+  @RequirePermission(CoursePermission.MANAGE_SESSIONS)
+  async createCourseSession(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Body() payload: CreateCourseSessionPayload,
+  ) {
+    return this.courseService.createCourseSession(courseId, payload);
+  }
+
+  @Get(':courseId/sessions')
+  @RequirePermission(CoursePermission.MANAGE_SESSIONS)
+  async getCourseSessions(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+  ) {
+    return this.courseService.getCourseSessions(courseId);
+  }
+
+  @Put(':courseId/sessions/:sessionId')
+  @RequirePermission(CoursePermission.MANAGE_SESSIONS)
+  async updateCourseSession(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+    @Body() payload: UpdateCourseSessionPayload,
+  ) {
+    return this.courseService.updateCourseSession(sessionId, payload);
+  }
+
+  @Delete(':courseId/sessions/:sessionId')
+  @RequirePermission(CoursePermission.MANAGE_SESSIONS)
+  async deleteCourseSession(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+  ) {
+    return this.courseService.deleteCourseSession(sessionId);
+  }
+
+  @Post(':courseId/sessions/:sessionId/classes')
+  @RequirePermission(CoursePermission.MANAGE_SESSIONS)
+  async createCourseClass(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+    @Body() payload: CreateCourseClassPayload,
+  ) {
+    return this.courseService.createCourseClass(sessionId, payload);
+  }
+
+  @Get(':courseId/sessions/:sessionId/classes')
+  @RequirePermission(CoursePermission.MANAGE_SESSIONS)
+  async getCourseClasses(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+  ) {
+    return this.courseService.getCourseClasses(sessionId);
+  }
+
+  @Put(':courseId/sessions/:sessionId/classes/:classId')
+  @RequirePermission(CoursePermission.MANAGE_SESSIONS)
+  async updateCourseClass(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+    @Param('classId', ParseIntPipe) classId: number,
+    @Body() payload: UpdateCourseClassPayload,
+  ) {
+    return this.courseService.updateCourseClass(classId, payload);
+  }
+
+  @Delete(':courseId/sessions/:sessionId/classes/:classId')
+  @RequirePermission(CoursePermission.MANAGE_SESSIONS)
+  async deleteCourseClass(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('sessionId', ParseIntPipe) sessionId: number,
+    @Param('classId', ParseIntPipe) classId: number,
+  ) {
+    return this.courseService.deleteCourseClass(classId);
+  }
+
+  @Post(':courseId/enrollments')
+  @RequirePermission(CoursePermission.MANAGE_ENROLLMENTS)
+  async createEnrollment(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Body('profileId', ParseIntPipe) profileId: number,
+  ) {
+    return this.courseService.createEnrollment(courseId, profileId);
+  }
+
+  @Get(':courseId/enrollments')
+  @RequirePermission(CoursePermission.MANAGE_ENROLLMENTS)
+  async getEnrollments(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+  ) {
+    return this.courseService.getEnrollments(courseId);
+  }
+
+  @Delete(':courseId/enrollments/:profileId')
+  @RequirePermission(CoursePermission.MANAGE_ENROLLMENTS)
+  async deleteEnrollment(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('profileId', ParseIntPipe) profileId: number,
+  ) {
+    return this.courseService.deleteEnrollment(courseId, profileId);
   }
 }

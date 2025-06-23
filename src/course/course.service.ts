@@ -9,11 +9,22 @@ import {
   UpdateCoursePayload,
   CourseResponse,
   CourseDetailResponse,
+  CreateCourseSessionPayload,
+  CourseSessionResponse,
+  UpdateCourseSessionPayload,
+  CreateCourseClassPayload,
+  UpdateCourseClassPayload,
+  CourseClassResponse,
 } from './payload/course.payload';
+import { PermissionService } from 'src/permission/permission.service';
+import { CoursePermission } from 'src/permission/enum/course-permission.enum';
 
 @Injectable()
 export class CourseService {
-  constructor(private readonly courseRepository: CourseRepository) {}
+  constructor(
+    private readonly courseRepository: CourseRepository,
+    private readonly permissionService: PermissionService,
+  ) {}
 
   async createCourse(
     createCoursePayload: CreateCoursePayload,
@@ -29,7 +40,10 @@ export class CourseService {
     organizationId: number,
     profileId: number,
   ): Promise<CourseResponse[]> {
-    const hasViewPermission = await this.checkViewPermission();
+    const hasViewPermission = await this.checkViewPermission(
+      profileId,
+      organizationId,
+    );
 
     if (hasViewPermission) {
       return this.courseRepository.findByOrganization(organizationId);
@@ -55,7 +69,10 @@ export class CourseService {
       throw new ForbiddenException('해당 조직의 수업이 아닙니다.');
     }
 
-    const hasViewPermission = await this.checkViewPermission();
+    const hasViewPermission = await this.checkViewPermission(
+      profileId,
+      organizationId,
+    );
 
     if (!hasViewPermission) {
       const enrolledCourses = await this.courseRepository.findEnrolledCourses(
@@ -129,9 +146,80 @@ export class CourseService {
     };
   }
 
-  private async checkViewPermission(): Promise<boolean> {
-    // 이 메서드는 나중에 PermissionService를 주입받아서 구현
-    // 현재는 임시로 false 반환 (수강 신청한 수업만 조회 가능)
-    return false;
+  async createCourseSession(
+    courseId: number,
+    payload: CreateCourseSessionPayload,
+  ): Promise<CourseSessionResponse> {
+    return this.courseRepository.createSession(courseId, payload);
+  }
+
+  async getCourseSessions(courseId: number): Promise<CourseSessionResponse[]> {
+    return this.courseRepository.findSessionsByCourseId(courseId);
+  }
+
+  async updateCourseSession(
+    sessionId: number,
+    payload: UpdateCourseSessionPayload,
+  ): Promise<CourseSessionResponse> {
+    return this.courseRepository.updateSession(sessionId, payload);
+  }
+
+  async deleteCourseSession(sessionId: number): Promise<{ message: string }> {
+    await this.courseRepository.deleteSession(sessionId);
+    return { message: '회차가 삭제되었습니다.' };
+  }
+
+  async createCourseClass(
+    sessionId: number,
+    payload: CreateCourseClassPayload,
+  ): Promise<CourseClassResponse> {
+    return this.courseRepository.createClass(sessionId, payload);
+  }
+
+  async getCourseClasses(sessionId: number): Promise<CourseClassResponse[]> {
+    return this.courseRepository.findClassesBySessionId(sessionId);
+  }
+
+  async updateCourseClass(
+    classId: number,
+    payload: UpdateCourseClassPayload,
+  ): Promise<CourseClassResponse> {
+    return this.courseRepository.updateClass(classId, payload);
+  }
+
+  async deleteCourseClass(classId: number): Promise<{ message: string }> {
+    await this.courseRepository.deleteClass(classId);
+    return { message: '분반이 삭제되었습니다.' };
+  }
+
+  async createEnrollment(
+    courseId: number,
+    profileId: number,
+  ): Promise<{ message: string }> {
+    await this.courseRepository.createEnrollment(courseId, profileId);
+    return { message: '수강신청이 완료되었습니다.' };
+  }
+
+  async getEnrollments(courseId: number): Promise<any[]> {
+    return this.courseRepository.findEnrollmentsByCourseId(courseId);
+  }
+
+  async deleteEnrollment(
+    courseId: number,
+    profileId: number,
+  ): Promise<{ message: string }> {
+    await this.courseRepository.deleteEnrollment(courseId, profileId);
+    return { message: '수강신청이 취소되었습니다.' };
+  }
+
+  private async checkViewPermission(
+    profileId: number,
+    organizationId: number,
+  ): Promise<boolean> {
+    return this.permissionService.checkPermission(
+      profileId,
+      organizationId,
+      CoursePermission.VIEW_COURSE_DETAILS,
+    );
   }
 }
