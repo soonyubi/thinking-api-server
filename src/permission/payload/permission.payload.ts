@@ -1,7 +1,7 @@
 import { IsNumber, IsOptional, IsEnum, IsDateString } from 'class-validator';
 import { CoursePermission } from '../enum/course-permission.enum';
 
-export class GrantPermissionDto {
+export class GrantPermissionPayload {
   @IsNumber()
   organizationId: number;
 
@@ -16,7 +16,7 @@ export class GrantPermissionDto {
   expiresAt?: string;
 }
 
-export class UpdatePermissionDto {
+export class UpdatePermissionPayload {
   @IsOptional()
   @IsDateString()
   expiresAt?: string;

@@ -3,8 +3,8 @@ import { MySql2Database } from 'drizzle-orm/mysql2';
 import { organizationPermissions } from '../../db/schema';
 import { eq, and, desc, isNull, or, gte } from 'drizzle-orm';
 import {
-  GrantPermissionDto,
-  UpdatePermissionDto,
+  GrantPermissionPayload,
+  UpdatePermissionPayload,
   PermissionResponse,
   PermissionHistoryResponse,
 } from '../payload/permission.payload';
@@ -19,7 +19,7 @@ export class PermissionRepository {
   ) {}
 
   async grantPermission(
-    grantPermissionDto: GrantPermissionDto,
+    grantPermissionDto: GrantPermissionPayload,
     grantedByProfileId: number,
   ): Promise<PermissionResponse> {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -155,7 +155,7 @@ export class PermissionRepository {
 
   async updatePermission(
     id: number,
-    updatePermissionDto: UpdatePermissionDto,
+    updatePermissionDto: UpdatePermissionPayload,
   ): Promise<PermissionResponse | null> {
     const updateData: any = {};
 

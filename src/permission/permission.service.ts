@@ -6,8 +6,8 @@ import {
 } from '@nestjs/common';
 import { PermissionRepository } from './repositories/permission.repository';
 import {
-  GrantPermissionDto,
-  UpdatePermissionDto,
+  GrantPermissionPayload,
+  UpdatePermissionPayload,
   PermissionResponse,
   PermissionHistoryResponse,
 } from './payload/permission.payload';
@@ -18,7 +18,7 @@ export class PermissionService {
   constructor(private permissionRepository: PermissionRepository) {}
 
   async grantPermission(
-    grantPermissionDto: GrantPermissionDto,
+    grantPermissionDto: GrantPermissionPayload,
     grantedByProfileId: number,
   ): Promise<PermissionResponse> {
     const hasManagePermission = await this.permissionRepository.checkPermission(
@@ -72,7 +72,7 @@ export class PermissionService {
 
   async updatePermission(
     id: number,
-    updatePermissionDto: UpdatePermissionDto,
+    updatePermissionDto: UpdatePermissionPayload,
     updatedByProfileId: number,
   ): Promise<PermissionResponse> {
     const permission = await this.permissionRepository.findById(id);
