@@ -32,6 +32,7 @@ export class PermissionGuard implements CanActivate {
     }
 
     const organizationId = this.extractOrganizationId(request);
+
     if (!organizationId) {
       throw new ForbiddenException('조직 ID가 필요합니다.');
     }
@@ -49,7 +50,6 @@ export class PermissionGuard implements CanActivate {
     return true;
   }
 
-  // TODO : FIX ME
   private async checkAllPermissions(
     profileId: number,
     organizationId: number,
