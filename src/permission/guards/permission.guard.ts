@@ -16,12 +16,11 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredPermissions = this.reflector.get<CoursePermission[]>(
-      'permissions',
-      context.getHandler(),
-    );
+    const requiredPermissions = this.reflector.getAllAndOverride<
+      CoursePermission[]
+    >('permissions', [context.getHandler(), context.getClass()]);
 
-    if (!requiredPermissions) {
+    if (!requiredPermissions || requiredPermissions.length === 0) {
       return true;
     }
 
@@ -37,16 +36,35 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenException('조직 ID가 필요합니다.');
     }
 
-    const hasPermission = await this.permissionService.checkPermission(
+    const hasAllPermissions = await this.checkAllPermissions(
       user.profileId,
       organizationId,
-      requiredPermissions[0],
+      requiredPermissions,
     );
 
-    if (!hasPermission) {
+    if (!hasAllPermissions) {
       throw new ForbiddenException('필요한 권한이 없습니다.');
     }
 
+    return true;
+  }
+
+  // TODO : FIX ME
+  private async checkAllPermissions(
+    profileId: number,
+    organizationId: number,
+    permissions: CoursePermission[],
+  ): Promise<boolean> {
+    for (const permission of permissions) {
+      const hasPermission = await this.permissionService.checkPermission(
+        profileId,
+        organizationId,
+        permission,
+      );
+      if (!hasPermission) {
+        return false;
+      }
+    }
     return true;
   }
 
