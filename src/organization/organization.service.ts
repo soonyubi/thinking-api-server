@@ -9,10 +9,15 @@ import { OrganizationRepository } from './repositories/organization.repository';
 import { CreateOrganizationPayload } from './payload/create-organization.payload';
 import { AddMemberPayload } from './payload/add-member.payload';
 import { OrganizationRole } from 'src/common/enums/organization-role.enum';
+import { PermissionService } from '../permission/permission.service';
+import { CoursePermission } from '../permission/enum/course-permission.enum';
 
 @Injectable()
 export class OrganizationService {
-  constructor(private organizationRepository: OrganizationRepository) {}
+  constructor(
+    private organizationRepository: OrganizationRepository,
+    private permissionService: PermissionService,
+  ) {}
 
   async createOrganization(
     createDto: CreateOrganizationPayload,
@@ -45,6 +50,12 @@ export class OrganizationService {
       profileId: creatorProfileId,
       organizationId: createdOrg.id,
       roleInOrg: OrganizationRole.MAIN_ADMIN,
+    });
+
+    await this.permissionService.grantPermissionForOrganizationCreator({
+      organizationId: createdOrg.id,
+      profileId: creatorProfileId,
+      permission: CoursePermission.MANAGE_PERMISSIONS,
     });
 
     return this.organizationRepository.findById(createdOrg.id);

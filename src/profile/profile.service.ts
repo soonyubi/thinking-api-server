@@ -13,6 +13,7 @@ import { JwtPayload } from 'src/auth/interface/jwt-payload.interface';
 import { ProfileRelationshipRepository } from './repositories/profile-relationship.repository';
 import { RelationType } from 'src/common/enums/relation-type.enum';
 import { Role } from 'src/common/enums/role.enum';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ProfileService {
@@ -20,6 +21,7 @@ export class ProfileService {
     private profileRepository: ProfileRepository,
     @Inject('CACHE_STORE') private cacheStore: CacheStore,
     private relationshipRepository: ProfileRelationshipRepository,
+    private configService: ConfigService,
   ) {}
 
   async createProfile(
@@ -59,6 +61,9 @@ export class ProfileService {
   }
 
   private generateVerificationCode(): string {
+    if (this.configService.get('NODE_ENV') === 'test') {
+      return '123456';
+    }
     return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
