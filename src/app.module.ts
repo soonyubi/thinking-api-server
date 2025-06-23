@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DrizzleMySqlModule } from '@knaadh/nestjs-drizzle-mysql2';
@@ -7,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { OrganizationModule } from './organization/organization.module';
 import { PermissionModule } from './permission/permission.module';
+import { CourseModule } from './course/course.module';
+import { PermissionGuard } from './permission/guards/permission.guard';
 import * as schema from './db/schema';
 import { CacheModule } from './common/cache/cache.module';
 
@@ -35,6 +38,7 @@ import { CacheModule } from './common/cache/cache.module';
     ProfileModule,
     OrganizationModule,
     PermissionModule,
+    CourseModule,
     CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -44,6 +48,12 @@ import { CacheModule } from './common/cache/cache.module';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
+    },
+  ],
 })
 export class AppModule {}
