@@ -1,0 +1,3899 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "description": "API 서버의 상태를 확인합니다.",
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "서버 정상 동작",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "example": "Hello World!"
+                }
+              }
+            }
+          }
+        },
+        "summary": "헬스 체크",
+        "tags": [
+          "app"
+        ]
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "description": "새로운 사용자 계정을 생성합니다.",
+        "operationId": "AuthController_signup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignupPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "회원가입 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "회원가입이 완료되었습니다."
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "409": {
+            "description": "이미 존재하는 이메일"
+          }
+        },
+        "summary": "회원가입",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "사용자 인증을 통해 JWT 토큰을 발급받습니다.",
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "로그인 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "로그인이 완료되었습니다."
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "summary": "로그인",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/select-profile/{profileId}": {
+      "post": {
+        "description": "사용자가 특정 프로필을 선택하여 해당 프로필의 토큰을 발급받습니다.",
+        "operationId": "AuthController_selectProfile",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "description": "선택할 프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "프로필 선택 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "프로필이 선택되었습니다."
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "프로필 접근 권한 없음"
+          },
+          "404": {
+            "description": "프로필을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "프로필 선택",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/profiles/verify/send": {
+      "post": {
+        "description": "사용자 이메일로 인증 코드를 발송합니다.",
+        "operationId": "ProfileController_sendVerificationCode",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "인증 코드 발송 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "인증 코드가 이메일로 발송되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "이메일 인증 코드 발송",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/profiles": {
+      "post": {
+        "description": "새로운 프로필을 생성합니다.",
+        "operationId": "ProfileController_createProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProfilePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "프로필 생성 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "홍길동"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "STUDENT"
+                    },
+                    "birthDate": {
+                      "type": "string",
+                      "example": "1990-01-01"
+                    },
+                    "userId": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "409": {
+            "description": "이미 존재하는 프로필"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "프로필 생성",
+        "tags": [
+          "profiles"
+        ]
+      },
+      "get": {
+        "description": "현재 사용자의 모든 프로필을 조회합니다.",
+        "operationId": "ProfileController_getMyProfiles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "프로필 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "홍길동"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "STUDENT"
+                      },
+                      "birthDate": {
+                        "type": "string",
+                        "example": "1990-01-01"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "내 프로필 목록 조회",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/profiles/{id}": {
+      "get": {
+        "description": "특정 프로필의 상세 정보를 조회합니다.",
+        "operationId": "ProfileController_getProfile",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "프로필 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "홍길동"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "STUDENT"
+                    },
+                    "birthDate": {
+                      "type": "string",
+                      "example": "1990-01-01"
+                    },
+                    "userId": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "프로필을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "프로필 상세 조회",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/profiles/relationships": {
+      "post": {
+        "description": "학부모와 학생 간의 관계를 등록합니다.",
+        "operationId": "ProfileController_registerRelationship",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRelationshipPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "관계 등록 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "관계가 성공적으로 등록되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "대상 사용자를 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "관계 등록",
+        "tags": [
+          "profiles"
+        ]
+      },
+      "get": {
+        "description": "학부모는 자녀들의 프로필을, 학생은 부모의 프로필을 조회합니다.",
+        "operationId": "ProfileController_getRelatedProfiles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "관련 프로필 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "홍길동"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "STUDENT"
+                      },
+                      "relationship": {
+                        "type": "string",
+                        "example": "CHILD"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "관련 프로필 조회",
+        "tags": [
+          "profiles"
+        ]
+      }
+    },
+    "/organizations": {
+      "post": {
+        "description": "새로운 조직을 생성합니다.",
+        "operationId": "OrganizationController_createOrganization",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrganizationPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "조직 생성 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "테스트 학교"
+                    },
+                    "type": {
+                      "type": "string",
+                      "example": "school"
+                    },
+                    "mainAdminRole": {
+                      "type": "string",
+                      "example": "MAIN_ADMIN"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "example": "2024-01-01T00:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "조직 생성",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/{id}": {
+      "get": {
+        "description": "특정 조직의 상세 정보를 조회합니다.",
+        "operationId": "OrganizationController_getOrganization",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조직 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "테스트 학교"
+                    },
+                    "type": {
+                      "type": "string",
+                      "example": "school"
+                    },
+                    "mainAdminRole": {
+                      "type": "string",
+                      "example": "MAIN_ADMIN"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "example": "2024-01-01T00:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "조직을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "조직 상세 조회",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/{id}/members": {
+      "get": {
+        "description": "조직의 모든 멤버를 조회합니다.",
+        "operationId": "OrganizationController_getOrganizationMembers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "멤버 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "profileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "roleInOrg": {
+                        "type": "string",
+                        "example": "STUDENT"
+                      },
+                      "profile": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "홍길동"
+                          },
+                          "role": {
+                            "type": "string",
+                            "example": "STUDENT"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "조직 멤버 목록 조회",
+        "tags": [
+          "organizations"
+        ]
+      },
+      "post": {
+        "description": "조직에 새로운 멤버를 추가합니다.",
+        "operationId": "OrganizationController_addMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddMemberPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "멤버 추가 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "멤버가 성공적으로 추가되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "프로필을 찾을 수 없음"
+          },
+          "409": {
+            "description": "이미 조직에 존재하는 멤버"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "조직 멤버 추가",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/{id}/members/{role}": {
+      "get": {
+        "description": "특정 역할을 가진 조직 멤버들을 조회합니다.",
+        "operationId": "OrganizationController_getOrganizationMembersByRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "role",
+            "required": true,
+            "in": "path",
+            "description": "조회할 역할",
+            "schema": {
+              "enum": [
+                "MAIN_ADMIN",
+                "SUB_ADMIN",
+                "STUDENT",
+                "PARENT"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "역할별 멤버 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "profileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "roleInOrg": {
+                        "type": "string",
+                        "example": "STUDENT"
+                      },
+                      "profile": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "홍길동"
+                          },
+                          "role": {
+                            "type": "string",
+                            "example": "STUDENT"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "역할별 조직 멤버 조회",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/{id}/members/{profileId}/role": {
+      "put": {
+        "description": "조직 멤버의 역할을 변경합니다.",
+        "operationId": "OrganizationController_updateMemberRole",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "description": "프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "역할 변경 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "역할이 성공적으로 변경되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "멤버를 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "멤버 역할 변경",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/{id}/members/{profileId}": {
+      "delete": {
+        "description": "조직에서 멤버를 제거합니다.",
+        "operationId": "OrganizationController_removeMember",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "description": "프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "멤버 제거 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "멤버가 성공적으로 제거되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "멤버를 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "조직 멤버 제거",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/my-organizations": {
+      "get": {
+        "description": "현재 사용자가 속한 모든 조직을 조회합니다.",
+        "operationId": "OrganizationController_getMyOrganizations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "조직 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "테스트 학교"
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "school"
+                      },
+                      "roleInOrg": {
+                        "type": "string",
+                        "example": "STUDENT"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "내 조직 목록 조회",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/organizations/my-admin-organizations": {
+      "get": {
+        "description": "현재 사용자가 주 관리자인 조직들을 조회합니다.",
+        "operationId": "OrganizationController_getMyAdminOrganizations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "관리 조직 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "테스트 학교"
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "school"
+                      },
+                      "roleInOrg": {
+                        "type": "string",
+                        "example": "MAIN_ADMIN"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "내 관리 조직 목록 조회",
+        "tags": [
+          "organizations"
+        ]
+      }
+    },
+    "/permissions/organizations/{organizationId}": {
+      "post": {
+        "description": "조직 내 특정 프로필에 권한을 부여합니다.",
+        "operationId": "PermissionController_grantPermission",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GrantPermissionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "권한 부여 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "organizationId": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "profileId": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "permission": {
+                      "type": "string",
+                      "example": "CREATE_COURSE"
+                    },
+                    "grantedByProfileId": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "example": "2024-01-01T00:00:00.000Z"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "example": "2024-12-31T00:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "조직 또는 프로필을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "권한 부여",
+        "tags": [
+          "permissions"
+        ]
+      },
+      "get": {
+        "description": "조직의 모든 권한을 조회합니다.",
+        "operationId": "PermissionController_getOrganizationPermissions",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "조직 권한 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "organizationId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "profileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "permission": {
+                        "type": "string",
+                        "example": "CREATE_COURSE"
+                      },
+                      "grantedByProfileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "example": "2024-01-01T00:00:00.000Z"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "example": "2024-12-31T00:00:00.000Z"
+                      },
+                      "organization": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "테스트 학교"
+                          }
+                        }
+                      },
+                      "profile": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "홍길동"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "조직 권한 목록 조회",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/permissions/organizations/{organizationId}/profiles/{profileId}": {
+      "delete": {
+        "description": "조직 내 특정 프로필의 권한을 취소합니다.",
+        "operationId": "PermissionController_revokePermission",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "description": "프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "permission",
+            "required": true,
+            "in": "query",
+            "description": "취소할 권한",
+            "schema": {
+              "enum": [
+                "course:create",
+                "course:update",
+                "course:delete",
+                "course:enrollment:manage",
+                "course:attendance:manage",
+                "course:instructor:assign",
+                "course:view",
+                "course:session:manage",
+                "course:class:manage",
+                "permission:manage"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "권한 취소 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "권한이 성공적으로 취소되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "권한을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "권한 취소",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/permissions/{id}": {
+      "put": {
+        "description": "기존 권한 정보를 수정합니다.",
+        "operationId": "PermissionController_updatePermission",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "권한 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePermissionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "권한 수정 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "organizationId": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "profileId": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "permission": {
+                      "type": "string",
+                      "example": "CREATE_COURSE"
+                    },
+                    "expiresAt": {
+                      "type": "string",
+                      "example": "2024-12-31T00:00:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "권한을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "권한 수정",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/permissions/profiles/{profileId}": {
+      "get": {
+        "description": "특정 프로필의 모든 권한을 조회합니다.",
+        "operationId": "PermissionController_getProfilePermissions",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "description": "프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "프로필 권한 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "organizationId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "profileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "permission": {
+                        "type": "string",
+                        "example": "CREATE_COURSE"
+                      },
+                      "grantedByProfileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "example": "2024-01-01T00:00:00.000Z"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "example": "2024-12-31T00:00:00.000Z"
+                      },
+                      "organization": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "테스트 학교"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "프로필 권한 목록 조회",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/permissions/profiles/{profileId}/organizations/{organizationId}/active": {
+      "get": {
+        "description": "특정 프로필의 특정 조직에서 활성화된 권한을 조회합니다.",
+        "operationId": "PermissionController_getActivePermissions",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "description": "프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "활성 권한 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "organizationId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "profileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "permission": {
+                        "type": "string",
+                        "example": "CREATE_COURSE"
+                      },
+                      "grantedByProfileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "example": "2024-01-01T00:00:00.000Z"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "example": "2024-12-31T00:00:00.000Z"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "활성 권한 조회",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/permissions/check": {
+      "get": {
+        "description": "특정 프로필이 특정 조직에서 특정 권한을 가지고 있는지 확인합니다.",
+        "operationId": "PermissionController_checkPermission",
+        "parameters": [
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "query",
+            "description": "프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "query",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "permission",
+            "required": true,
+            "in": "query",
+            "description": "확인할 권한",
+            "schema": {
+              "enum": [
+                "course:create",
+                "course:update",
+                "course:delete",
+                "course:enrollment:manage",
+                "course:attendance:manage",
+                "course:instructor:assign",
+                "course:view",
+                "course:session:manage",
+                "course:class:manage",
+                "permission:manage"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "권한 확인 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "hasPermission": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "permission": {
+                      "type": "string",
+                      "example": "CREATE_COURSE"
+                    },
+                    "organizationId": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "profileId": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "권한 확인",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/permissions/organizations/{organizationId}/history": {
+      "get": {
+        "description": "조직의 권한 부여 이력을 조회합니다.",
+        "operationId": "PermissionController_getPermissionHistory",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "profileId",
+            "required": false,
+            "in": "query",
+            "description": "프로필 ID (선택사항)",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "권한 이력 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "organizationId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "profileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "permission": {
+                        "type": "string",
+                        "example": "CREATE_COURSE"
+                      },
+                      "grantedByProfileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "example": "2024-01-01T00:00:00.000Z"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "example": "2024-12-31T00:00:00.000Z"
+                      },
+                      "isActive": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "organization": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "테스트 학교"
+                          }
+                        }
+                      },
+                      "profile": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "홍길동"
+                          }
+                        }
+                      },
+                      "grantedBy": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "관리자"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "권한 이력 조회",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/permissions/expired": {
+      "get": {
+        "description": "만료된 모든 권한을 조회합니다.",
+        "operationId": "PermissionController_getExpiredPermissions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "만료된 권한 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "organizationId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "profileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "permission": {
+                        "type": "string",
+                        "example": "CREATE_COURSE"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "example": "2023-12-31T00:00:00.000Z"
+                      },
+                      "organization": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "테스트 학교"
+                          }
+                        }
+                      },
+                      "profile": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "홍길동"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "만료된 권한 조회",
+        "tags": [
+          "permissions"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses": {
+      "post": {
+        "description": "새로운 수업을 생성합니다.",
+        "operationId": "CourseController_createCourse",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCoursePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "수업 생성 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "수학 기초"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "기초 수학 과정"
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "example": "2024-01-01"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "example": "2024-12-31"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "active"
+                    },
+                    "organizationId": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수업 생성",
+        "tags": [
+          "courses"
+        ]
+      },
+      "get": {
+        "description": "조직의 모든 수업을 조회합니다.",
+        "operationId": "CourseController_getCourses",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수업 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "수학 기초"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "기초 수학 과정"
+                      },
+                      "startDate": {
+                        "type": "string",
+                        "example": "2024-01-01"
+                      },
+                      "endDate": {
+                        "type": "string",
+                        "example": "2024-12-31"
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "active"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수업 목록 조회",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses/{courseId}": {
+      "get": {
+        "description": "특정 수업의 상세 정보를 조회합니다.",
+        "operationId": "CourseController_getCourseById",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수업 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "수학 기초"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "기초 수학 과정"
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "example": "2024-01-01"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "example": "2024-12-31"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "active"
+                    },
+                    "organizationId": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "404": {
+            "description": "수업을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수업 상세 조회",
+        "tags": [
+          "courses"
+        ]
+      },
+      "put": {
+        "description": "기존 수업 정보를 수정합니다.",
+        "operationId": "CourseController_updateCourse",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCoursePayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "수업 수정 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "수학 기초 (수정됨)"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "기초 수학 과정 - 수정된 설명"
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "example": "2024-01-01"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "example": "2024-12-31"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "active"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "수업을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수업 수정",
+        "tags": [
+          "courses"
+        ]
+      },
+      "delete": {
+        "description": "수업을 삭제합니다.",
+        "operationId": "CourseController_deleteCourse",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수업 삭제 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "수업이 삭제되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "수업을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수업 삭제",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses/{courseId}/detail": {
+      "get": {
+        "description": "수업의 상세 정보와 회차, 수강생 수를 조회합니다.",
+        "operationId": "CourseController_getCourseDetail",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수업 상세 정보 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "수학 기초"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "기초 수학 과정"
+                    },
+                    "startDate": {
+                      "type": "string",
+                      "example": "2024-01-01"
+                    },
+                    "endDate": {
+                      "type": "string",
+                      "example": "2024-12-31"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "active"
+                    },
+                    "sessions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "sessionNumber": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "title": {
+                            "type": "string",
+                            "example": "1차시 - 수의 개념"
+                          }
+                        }
+                      }
+                    },
+                    "enrollmentCount": {
+                      "type": "number",
+                      "example": 15
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "404": {
+            "description": "수업을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수업 상세 정보 조회",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses/{courseId}/sessions": {
+      "post": {
+        "description": "수업에 새로운 회차를 생성합니다.",
+        "operationId": "CourseController_createCourseSession",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCourseSessionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "회차 생성 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "sessionNumber": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "1차시 - 수의 개념"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "기본적인 수의 개념을 배웁니다"
+                    },
+                    "sessionDate": {
+                      "type": "string",
+                      "example": "2024-01-15"
+                    },
+                    "startTime": {
+                      "type": "string",
+                      "example": "09:00"
+                    },
+                    "endTime": {
+                      "type": "string",
+                      "example": "10:30"
+                    },
+                    "courseId": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "수업을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "회차 생성",
+        "tags": [
+          "courses"
+        ]
+      },
+      "get": {
+        "description": "수업의 모든 회차를 조회합니다.",
+        "operationId": "CourseController_getCourseSessions",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "회차 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "sessionNumber": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "title": {
+                        "type": "string",
+                        "example": "1차시 - 수의 개념"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "기본적인 수의 개념을 배웁니다"
+                      },
+                      "sessionDate": {
+                        "type": "string",
+                        "example": "2024-01-15"
+                      },
+                      "startTime": {
+                        "type": "string",
+                        "example": "09:00"
+                      },
+                      "endTime": {
+                        "type": "string",
+                        "example": "10:30"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "회차 목록 조회",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses/{courseId}/sessions/{sessionId}": {
+      "put": {
+        "description": "기존 회차 정보를 수정합니다.",
+        "operationId": "CourseController_updateCourseSession",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "회차 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourseSessionPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "회차 수정 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "sessionNumber": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "1차시 - 수의 개념 (수정됨)"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "기본적인 수의 개념을 배웁니다 - 수정됨"
+                    },
+                    "sessionDate": {
+                      "type": "string",
+                      "example": "2024-01-15"
+                    },
+                    "startTime": {
+                      "type": "string",
+                      "example": "09:00"
+                    },
+                    "endTime": {
+                      "type": "string",
+                      "example": "10:30"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "회차를 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "회차 수정",
+        "tags": [
+          "courses"
+        ]
+      },
+      "delete": {
+        "description": "회차를 삭제합니다.",
+        "operationId": "CourseController_deleteCourseSession",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "회차 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "회차 삭제 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "회차가 삭제되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "회차를 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "회차 삭제",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses/{courseId}/sessions/{sessionId}/classes": {
+      "post": {
+        "description": "회차에 새로운 분반을 생성합니다.",
+        "operationId": "CourseController_createCourseClass",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "회차 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCourseClassPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "분반 생성 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "className": {
+                      "type": "string",
+                      "example": "A반"
+                    },
+                    "capacity": {
+                      "type": "number",
+                      "example": 20
+                    },
+                    "location": {
+                      "type": "string",
+                      "example": "101호"
+                    },
+                    "instructorProfileId": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "sessionId": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "회차를 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "분반 생성",
+        "tags": [
+          "courses"
+        ]
+      },
+      "get": {
+        "description": "회차의 모든 분반을 조회합니다.",
+        "operationId": "CourseController_getCourseClasses",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "회차 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "분반 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "className": {
+                        "type": "string",
+                        "example": "A반"
+                      },
+                      "capacity": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "location": {
+                        "type": "string",
+                        "example": "101호"
+                      },
+                      "instructorProfileId": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "분반 목록 조회",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses/{courseId}/sessions/{sessionId}/classes/{classId}": {
+      "put": {
+        "description": "기존 분반 정보를 수정합니다.",
+        "operationId": "CourseController_updateCourseClass",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "회차 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "classId",
+            "required": true,
+            "in": "path",
+            "description": "분반 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourseClassPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "분반 수정 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "className": {
+                      "type": "string",
+                      "example": "A반 (수정됨)"
+                    },
+                    "capacity": {
+                      "type": "number",
+                      "example": 25
+                    },
+                    "location": {
+                      "type": "string",
+                      "example": "102호"
+                    },
+                    "instructorProfileId": {
+                      "type": "number",
+                      "example": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "분반을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "분반 수정",
+        "tags": [
+          "courses"
+        ]
+      },
+      "delete": {
+        "description": "분반을 삭제합니다.",
+        "operationId": "CourseController_deleteCourseClass",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "회차 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "classId",
+            "required": true,
+            "in": "path",
+            "description": "분반 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "분반 삭제 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "분반이 삭제되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "분반을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "분반 삭제",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses/{courseId}/enrollments": {
+      "post": {
+        "description": "수업에 수강신청합니다.",
+        "operationId": "CourseController_createEnrollment",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "수강신청 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "수강신청이 완료되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "잘못된 요청 데이터"
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "수업 또는 프로필을 찾을 수 없음"
+          },
+          "409": {
+            "description": "이미 수강신청된 수업"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수강신청",
+        "tags": [
+          "courses"
+        ]
+      },
+      "get": {
+        "description": "수업의 모든 수강신청을 조회합니다.",
+        "operationId": "CourseController_getEnrollments",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수강신청 목록 조회 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "courseId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "profileId": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "enrolledAt": {
+                        "type": "string",
+                        "example": "2024-01-01T00:00:00.000Z"
+                      },
+                      "profile": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "홍길동"
+                          },
+                          "role": {
+                            "type": "string",
+                            "example": "STUDENT"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수강신청 목록 조회",
+        "tags": [
+          "courses"
+        ]
+      }
+    },
+    "/organizations/{organizationId}/courses/{courseId}/enrollments/{profileId}": {
+      "delete": {
+        "description": "수강신청을 취소합니다.",
+        "operationId": "CourseController_deleteEnrollment",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "required": true,
+            "in": "path",
+            "description": "조직 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "description": "수업 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "profileId",
+            "required": true,
+            "in": "path",
+            "description": "프로필 ID",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "수강신청 취소 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "수강신청이 취소되었습니다."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패"
+          },
+          "403": {
+            "description": "권한 없음"
+          },
+          "404": {
+            "description": "수강신청을 찾을 수 없음"
+          }
+        },
+        "security": [
+          {
+            "JWT-auth": []
+          }
+        ],
+        "summary": "수강신청 취소",
+        "tags": [
+          "courses"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Thinking API Server",
+    "description": "수업 관리 시스템 API 문서",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "인증 관련 API"
+    },
+    {
+      "name": "profiles",
+      "description": "프로필 관리 API"
+    },
+    {
+      "name": "organizations",
+      "description": "조직 관리 API"
+    },
+    {
+      "name": "courses",
+      "description": "수업 관리 API"
+    },
+    {
+      "name": "permissions",
+      "description": "권한 관리 API"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "JWT 토큰을 입력하세요",
+        "in": "header"
+      }
+    },
+    "schemas": {
+      "SignupPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "사용자 이메일 주소",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "사용자 비밀번호 (최소 6자)",
+            "example": "password123",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginPayload": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "사용자 이메일 주소",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "사용자 비밀번호",
+            "example": "password123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "CreateProfilePayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "프로필 이름",
+            "example": "홍길동"
+          },
+          "role": {
+            "type": "string",
+            "description": "사용자 역할",
+            "enum": [
+              "STUDENT",
+              "PARENT",
+              "TEACHER",
+              "ADMIN"
+            ],
+            "example": "STUDENT"
+          },
+          "birthDate": {
+            "type": "string",
+            "description": "생년월일 (YYYY-MM-DD 형식)",
+            "example": "1990-01-01"
+          },
+          "verificationCode": {
+            "type": "string",
+            "description": "이메일 인증 코드",
+            "example": "123456"
+          }
+        },
+        "required": [
+          "name",
+          "role",
+          "birthDate",
+          "verificationCode"
+        ]
+      },
+      "RegisterRelationshipPayload": {
+        "type": "object",
+        "properties": {
+          "targetUserEmail": {
+            "type": "string",
+            "description": "관계를 등록할 대상 사용자의 이메일",
+            "example": "student@example.com"
+          }
+        },
+        "required": [
+          "targetUserEmail"
+        ]
+      },
+      "CreateOrganizationPayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "조직명",
+            "example": "테스트 학교"
+          },
+          "type": {
+            "type": "string",
+            "description": "조직 유형",
+            "example": "school"
+          },
+          "mainAdminRole": {
+            "type": "string",
+            "description": "주 관리자 역할",
+            "enum": [
+              "MAIN_ADMIN",
+              "SUB_ADMIN",
+              "STUDENT",
+              "PARENT"
+            ],
+            "example": "MAIN_ADMIN"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "mainAdminRole"
+        ]
+      },
+      "AddMemberPayload": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "number",
+            "description": "추가할 멤버의 프로필 ID",
+            "example": 1
+          },
+          "roleInOrg": {
+            "type": "string",
+            "description": "조직 내 역할",
+            "enum": [
+              "MAIN_ADMIN",
+              "SUB_ADMIN",
+              "STUDENT",
+              "PARENT"
+            ],
+            "example": "STUDENT"
+          }
+        },
+        "required": [
+          "profileId",
+          "roleInOrg"
+        ]
+      },
+      "GrantPermissionPayload": {
+        "type": "object",
+        "properties": {
+          "organizationId": {
+            "type": "number",
+            "description": "조직 ID",
+            "example": 1
+          },
+          "profileId": {
+            "type": "number",
+            "description": "권한을 부여할 프로필 ID",
+            "example": 1
+          },
+          "permission": {
+            "type": "string",
+            "description": "부여할 권한",
+            "enum": [
+              "course:create",
+              "course:update",
+              "course:delete",
+              "course:enrollment:manage",
+              "course:attendance:manage",
+              "course:instructor:assign",
+              "course:view",
+              "course:session:manage",
+              "course:class:manage",
+              "permission:manage"
+            ],
+            "example": "course:create"
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "권한 만료일 (YYYY-MM-DD 형식)",
+            "example": "2024-12-31"
+          }
+        },
+        "required": [
+          "organizationId",
+          "profileId",
+          "permission"
+        ]
+      },
+      "UpdatePermissionPayload": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "description": "권한 만료일 (YYYY-MM-DD 형식)",
+            "example": "2024-12-31"
+          }
+        }
+      },
+      "CreateCoursePayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "수업명",
+            "example": "수학 기초"
+          },
+          "description": {
+            "type": "string",
+            "description": "수업 설명",
+            "example": "기초 수학 과정"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "수업 시작일 (YYYY-MM-DD 형식)",
+            "example": "2024-01-01"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "수업 종료일 (YYYY-MM-DD 형식)",
+            "example": "2024-12-31"
+          },
+          "status": {
+            "type": "string",
+            "description": "수업 상태",
+            "enum": [
+              "active",
+              "inactive",
+              "completed"
+            ],
+            "example": "active"
+          }
+        },
+        "required": [
+          "name",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "UpdateCoursePayload": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "수업명",
+            "example": "수학 기초 (수정됨)"
+          },
+          "description": {
+            "type": "string",
+            "description": "수업 설명",
+            "example": "기초 수학 과정 - 수정된 설명"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "수업 시작일 (YYYY-MM-DD 형식)",
+            "example": "2024-01-01"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "수업 종료일 (YYYY-MM-DD 형식)",
+            "example": "2024-12-31"
+          },
+          "status": {
+            "type": "string",
+            "description": "수업 상태",
+            "enum": [
+              "active",
+              "inactive",
+              "completed"
+            ],
+            "example": "active"
+          }
+        }
+      },
+      "CreateCourseSessionPayload": {
+        "type": "object",
+        "properties": {
+          "sessionNumber": {
+            "type": "number",
+            "description": "회차 번호",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "description": "회차 제목",
+            "example": "1차시 - 수의 개념"
+          },
+          "description": {
+            "type": "string",
+            "description": "회차 설명",
+            "example": "기본적인 수의 개념을 배웁니다"
+          },
+          "sessionDate": {
+            "type": "string",
+            "description": "회차 날짜 (YYYY-MM-DD 형식)",
+            "example": "2024-01-15"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "시작 시간 (HH:MM 형식)",
+            "example": "09:00"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "종료 시간 (HH:MM 형식)",
+            "example": "10:30"
+          }
+        },
+        "required": [
+          "sessionNumber",
+          "title",
+          "sessionDate"
+        ]
+      },
+      "UpdateCourseSessionPayload": {
+        "type": "object",
+        "properties": {
+          "sessionNumber": {
+            "type": "number",
+            "description": "회차 번호",
+            "example": 1
+          },
+          "title": {
+            "type": "string",
+            "description": "회차 제목",
+            "example": "1차시 - 수의 개념 (수정됨)"
+          },
+          "description": {
+            "type": "string",
+            "description": "회차 설명",
+            "example": "기본적인 수의 개념을 배웁니다 - 수정됨"
+          },
+          "sessionDate": {
+            "type": "string",
+            "description": "회차 날짜 (YYYY-MM-DD 형식)",
+            "example": "2024-01-15"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "시작 시간 (HH:MM 형식)",
+            "example": "09:00"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "종료 시간 (HH:MM 형식)",
+            "example": "10:30"
+          }
+        }
+      },
+      "CreateCourseClassPayload": {
+        "type": "object",
+        "properties": {
+          "className": {
+            "type": "string",
+            "description": "분반명",
+            "example": "A반"
+          },
+          "capacity": {
+            "type": "number",
+            "description": "수용 인원",
+            "example": 20
+          },
+          "location": {
+            "type": "string",
+            "description": "수업 장소",
+            "example": "101호"
+          },
+          "instructorProfileId": {
+            "type": "number",
+            "description": "강사 프로필 ID",
+            "example": 1
+          }
+        },
+        "required": [
+          "className"
+        ]
+      },
+      "UpdateCourseClassPayload": {
+        "type": "object",
+        "properties": {
+          "className": {
+            "type": "string",
+            "description": "분반명",
+            "example": "A반 (수정됨)"
+          },
+          "capacity": {
+            "type": "number",
+            "description": "수용 인원",
+            "example": 25
+          },
+          "location": {
+            "type": "string",
+            "description": "수업 장소",
+            "example": "102호"
+          },
+          "instructorProfileId": {
+            "type": "number",
+            "description": "강사 프로필 ID",
+            "example": 1
+          }
+        }
+      }
+    }
+  }
+}
