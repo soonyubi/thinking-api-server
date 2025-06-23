@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { OrganizationModule } from './organization/organization.module';
+import { PermissionModule } from './permission/permission.module';
 import * as schema from './db/schema';
 import { CacheModule } from './common/cache/cache.module';
 
@@ -33,6 +34,7 @@ import { CacheModule } from './common/cache/cache.module';
     AuthModule,
     ProfileModule,
     OrganizationModule,
+    PermissionModule,
     CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
