@@ -190,4 +190,23 @@ export class PermissionService {
       }
     }
   }
+
+  async grantPermissionForOrganizationCreator(
+    grantPermissionDto: GrantPermissionPayload,
+  ): Promise<PermissionResponse> {
+    const existingPermission = await this.permissionRepository.checkPermission(
+      grantPermissionDto.profileId,
+      grantPermissionDto.organizationId,
+      grantPermissionDto.permission,
+    );
+
+    if (existingPermission) {
+      throw new BadRequestException('이미 해당 권한이 부여되어 있습니다.');
+    }
+
+    return this.permissionRepository.grantPermission(
+      grantPermissionDto,
+      grantPermissionDto.profileId,
+    );
+  }
 }

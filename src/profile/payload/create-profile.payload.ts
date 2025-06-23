@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsString, IsEnum, IsDate } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsEnum,
+  IsDate,
+  IsDateString,
+} from 'class-validator';
 import { Role } from 'src/common/enums/role.enum';
 
 export class CreateProfilePayload {
@@ -9,7 +15,7 @@ export class CreateProfilePayload {
   @IsEnum(Role)
   role: Role;
 
-  @IsDate()
+  @IsDateString()
   birthDate: Date;
 
   @IsString()
